@@ -1,0 +1,11 @@
+{
+  "medicamentos": [
+    { "id": "1", "nombre": "Amoxicilina", "principioActivo": "Amoxicilina", "dosis": "10mg/kg cada 12h" }
+  ],
+  "clinica": {
+    "sede_central": { "nombre": "PetCare Chillan", "lat": -36.6065, "lng": -72.1034, "direccion": "Av. Principal 123" }
+  },
+  "notificaciones_log": [
+    { "destinatario": "cliente@mail.com", "tipoEvento": "CONFIRMADA", "mensaje": "Hora confirmada", "fecha": "2026-11-18T10:00:00Z" }
+  ]
+}
