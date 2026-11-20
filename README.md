@@ -25,7 +25,3 @@ npm run dev
 Spring consume a Node con la env `INTEGRATIONS_BASE_URL` (ej: `http://192.168.1.10:3001`).
 En la misma máquina usar `http://localhost:3001`.
 
-## Falta (cuando suban el resto)
-
-- Models + services en Spring (cliente, mascota, reserva, atencion).
-- Conectar `firestore.sample.json` a Firestore real con firebase-admin (solo en Node).
