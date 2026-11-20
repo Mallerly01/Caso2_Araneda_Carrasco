@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>PetCare — Clínica veterinaria</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script>
+    if (localStorage.getItem('petcare-dark') === '1') document.documentElement.classList.add('dark');
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body class="min-h-screen bg-background text-foreground">
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+  <defs>
+    <symbol id="icon-house" viewBox="0 0 24 24">
+      <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
+      <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    </symbol>
+    <symbol id="icon-users" viewBox="0 0 24 24">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </symbol>
+    <symbol id="icon-paw" viewBox="0 0 24 24">
+      <circle cx="11" cy="4" r="2"/>
+      <circle cx="18" cy="8" r="2"/>
+      <circle cx="20" cy="16" r="2"/>
+      <path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/>
+    </symbol>
+    <symbol id="icon-dog" viewBox="0 0 24 24">
+      <path d="M10 5.172C10 3.782 8.423 2.679 6.5 3c-2.823.47-4.113 6.006-4 7 .08.703 1.725 1.722 3.656 1 1.261-.472 1.96-1.45 2.344-2.5"/>
+      <path d="M14.267 5.172c0-1.39 1.577-2.493 3.5-2.172 2.823.47 4.113 6.006 4 7-.08.703-1.725 1.722-3.656 1-1.261-.472-1.96-1.45-2.344-2.5"/>
+      <path d="M8 14v.5"/>
+      <path d="M16 14v.5"/>
+      <path d="M11.25 16.25h1.5L12 17l-.75-.75Z"/>
+      <path d="M4.42 11.247A13.152 13.152 0 0 0 4 14.556C4 18.728 7.582 21 12 21s8-2.272 8-6.444c0-1.061-.162-2.2-.493-3.309m-9.243-6.082A8.801 8.801 0 0 1 12 5c.78 0 1.5.108 2.161.306"/>
+    </symbol>
+    <symbol id="icon-cat" viewBox="0 0 24 24">
+      <path d="M12 5c.67 0 1.35.09 2 .26 1.78-2 5.03-2.84 6.42-2.26 1.4.58-.42 7-.42 7 .57 1.07 1 2.24 1 3.44C21 17.9 16.97 21 12 21s-9-3.1-9-7.56c0-1.25.5-2.4 1-3.44 0 0-1.89-6.42-.5-7 1.39-.58 4.72.23 6.5 2.23A9.04 9.04 0 0 1 12 5Z"/>
+      <path d="M8 14v.5"/>
+      <path d="M16 14v.5"/>
+      <path d="M11.25 16.25h1.5L12 17l-.75-.75Z"/>
+    </symbol>
+    <symbol id="icon-calendar" viewBox="0 0 24 24">
+      <path d="M8 2v4"/>
+      <path d="M16 2v4"/>
+      <rect width="18" height="18" x="3" y="4" rx="2"/>
+      <path d="M3 10h18"/>
+      <path d="M8 14h.01"/>
+      <path d="M12 14h.01"/>
+      <path d="M16 14h.01"/>
+      <path d="M8 18h.01"/>
+      <path d="M12 18h.01"/>
+      <path d="M16 18h.01"/>
+    </symbol>
+    <symbol id="icon-stethoscope" viewBox="0 0 24 24">
+      <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/>
+      <path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/>
+      <circle cx="20" cy="10" r="2"/>
+    </symbol>
+    <symbol id="icon-pill" viewBox="0 0 24 24">
+      <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/>
+      <path d="m8.5 8.5 7 7"/>
+    </symbol>
+    <symbol id="icon-map-pin" viewBox="0 0 24 24">
+      <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/>
+      <circle cx="12" cy="10" r="3"/>
+    </symbol>
+    <symbol id="icon-bell" viewBox="0 0 24 24">
+      <path d="M10.268 21a2 2 0 0 0 3.464 0"/>
+      <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>
+    </symbol>
+    <symbol id="icon-sun" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="4"/>
+      <path d="M12 2v2"/>
+      <path d="M12 20v2"/>
+      <path d="m4.93 4.93 1.41 1.41"/>
+      <path d="m17.66 17.66 1.41 1.41"/>
+      <path d="M2 12h2"/>
+      <path d="M20 12h2"/>
+      <path d="m6.34 17.66-1.41 1.41"/>
+      <path d="m19.07 4.93-1.41 1.41"/>
+    </symbol>
+    <symbol id="icon-moon" viewBox="0 0 24 24">
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+    </symbol>
+    <symbol id="icon-menu" viewBox="0 0 24 24">
+      <path d="M4 12h16"/>
+      <path d="M4 6h16"/>
+      <path d="M4 18h16"/>
+    </symbol>
+    <symbol id="icon-x" viewBox="0 0 24 24">
+      <path d="M18 6 6 18"/>
+      <path d="m6 6 12 12"/>
+    </symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24">
+      <path d="M5 12h14"/>
+      <path d="M12 5v14"/>
+    </symbol>
+    <symbol id="icon-search" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8"/>
+      <path d="m21 21-4.3-4.3"/>
+    </symbol>
+    <symbol id="icon-pencil" viewBox="0 0 24 24">
+      <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+      <path d="m15 5 4 4"/>
+    </symbol>
+    <symbol id="icon-trash" viewBox="0 0 24 24">
+      <path d="M3 6h18"/>
+      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+      <line x1="10" x2="10" y1="11" y2="17"/>
+      <line x1="14" x2="14" y1="11" y2="17"/>
+    </symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24">
+      <path d="M20 6 9 17l-5-5"/>
+    </symbol>
+    <symbol id="icon-clock" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </symbol>
+    <symbol id="icon-arrow-right" viewBox="0 0 24 24">
+      <path d="M5 12h14"/>
+      <path d="m12 5 7 7-7 7"/>
+    </symbol>
+    <symbol id="icon-info" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 16v-4"/>
+      <path d="M12 8h.01"/>
+    </symbol>
+    <symbol id="icon-user" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="5"/>
+      <path d="M20 21a8 8 0 0 0-16 0"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="lg:flex">
+  <aside class="sidebar px-4 py-5">
+    <svg class="sidebar-watermark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+      <use href="#icon-paw"></use>
+    </svg>
+    <div class="relative z-10 lg:flex lg:h-full lg:flex-col">
+      <div class="flex items-center justify-between gap-3">
+        <a class="brand" href="/" aria-label="PetCare, inicio">
+          <span class="brand-mark">
+            <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <use href="#icon-paw"></use>
+            </svg>
+          </span>
+          <span>
+            <span class="brand-name">PetCare</span>
+            <span class="brand-tagline">Cuidado que se nota</span>
+          </span>
+        </a>
+        <button id="toggle-nav" class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-principal" aria-label="Abrir menú">
+          <svg class="icon menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <use href="#icon-menu"></use>
+          </svg>
+          <svg class="icon close-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <use href="#icon-x"></use>
+          </svg>
+        </button>
+      </div>
+
+      <nav id="nav-principal" class="nav-principal hidden lg:block lg:flex-1 lg:overflow-y-auto" aria-label="Navegación principal">
+        <p class="nav-label">Clínica</p>
+        <button class="nav-item nav-item-active" data-view="dashboard" type="button">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-house"></use></svg>
+          <span>Hoy</span>
+        </button>
+        <button class="nav-item" data-view="clientes" type="button">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-users"></use></svg>
+          <span>Clientes</span>
+        </button>
+        <button class="nav-item" data-view="mascotas" type="button">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-paw"></use></svg>
+          <span>Pacientes</span>
+        </button>
+        <button class="nav-item" data-view="reservas" type="button">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+          <span>Reservas</span>
+        </button>
+        <button class="nav-item" data-view="atenciones" type="button">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-stethoscope"></use></svg>
+          <span>Atenciones</span>
+        </button>
+        <p class="nav-label">Servicios</p>
+        <button class="nav-item" data-view="medicamentos" type="button">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-pill"></use></svg>
+          <span>Medicamentos</span>
+        </button>
+        <button class="nav-item" data-view="clinica" type="button">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-map-pin"></use></svg>
+          <span>Clínica</span>
+        </button>
+        <button class="nav-item" data-view="notificaciones" type="button">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-bell"></use></svg>
+          <span>Notificaciones</span>
+        </button>
+
+        <div class="sidebar-footer">
+          <button id="toggle-dark" class="nav-item" type="button">
+            <span id="icono-tema" class="flex h-5 w-5 items-center justify-center">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-moon"></use></svg>
+            </span>
+            <span id="etiqueta-tema">Modo oscuro</span>
+          </button>
+          <p class="sidebar-note">PetCare · Chillán</p>
+        </div>
+      </nav>
+    </div>
+  </aside>
+
+  <main id="contenido" class="main-content">
+    <header class="page-header">
+      <div class="min-w-0">
+        <h1 id="view-title" class="page-title">Hoy en PetCare</h1>
+        <p id="view-subtitle" class="page-subtitle">Lo que necesita la clínica hoy.</p>
+      </div>
+      <div class="page-actions">
+        <span class="page-date hidden sm:inline-flex">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+          <span id="page-date-text"></span>
+        </span>
+        <button class="btn btn-primary" data-action="nueva-reserva" type="button">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-plus"></use></svg>
+          Nueva reserva
+        </button>
+      </div>
+    </header>
+
+    <section id="view-dashboard" class="view">
+      <div class="dashboard-grid">
+        <div class="surface">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Agenda próxima</h2>
+              <p class="panel-subtitle">Reservas pendientes y confirmadas</p>
+            </div>
+            <button class="btn btn-ghost btn-sm" data-action="ir-reservas" type="button">
+              Ver agenda completa
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-arrow-right"></use></svg>
+            </button>
+          </div>
+          <div id="agenda" class="agenda"></div>
+        </div>
+
+        <aside class="dashboard-rail">
+          <div class="surface rail-panel">
+            <h2 class="panel-title">Resumen</h2>
+            <dl class="summary-list">
+              <div class="summary-row"><dt>Pendientes</dt><dd id="resumen-pendientes">0</dd></div>
+              <div class="summary-row"><dt>Confirmadas</dt><dd id="resumen-confirmadas">0</dd></div>
+              <div class="summary-row"><dt>Atenciones</dt><dd id="resumen-atenciones">0</dd></div>
+            </dl>
+            <div class="rail-divider"></div>
+            <h3 class="rail-title">Accesos rápidos</h3>
+            <div class="quick-actions">
+              <button class="quick-action" data-action="nuevo-cliente" type="button">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-user"></use></svg>
+                <span>Registrar cliente</span>
+              </button>
+              <button class="quick-action" data-action="nueva-mascota" type="button">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-paw"></use></svg>
+                <span>Registrar mascota</span>
+              </button>
+              <button class="quick-action" data-action="nueva-atencion" type="button">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-stethoscope"></use></svg>
+                <span>Registrar atención</span>
+              </button>
+              <button class="quick-action" data-action="ir-medicamentos" type="button">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-pill"></use></svg>
+                <span>Buscar medicamento</span>
+              </button>
+            </div>
+            <div class="tip-row">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-info"></use></svg>
+              <p>Al confirmar o cancelar una reserva, el aviso queda registrado en Notificaciones.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="view-clientes" class="view hidden">
+      <div class="section-toolbar">
+        <p class="section-meta"><strong id="conteo-clientes">0</strong> clientes registrados</p>
+        <button class="btn btn-primary" data-action="nuevo-cliente" type="button">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-plus"></use></svg>
+          Nuevo cliente
+        </button>
+      </div>
+      <div class="surface overflow-hidden">
+        <div class="table-wrap" role="region" aria-label="Listado de clientes" tabindex="0">
+          <table class="table-base">
+            <caption class="sr-only">Clientes registrados en PetCare</caption>
+            <thead>
+            <tr><th scope="col">Cliente</th><th scope="col">Teléfono</th><th scope="col">Email</th><th scope="col" class="text-right">Acciones</th></tr>
+            </thead>
+            <tbody id="tabla-clientes"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-mascotas" class="view hidden">
+      <div class="section-toolbar">
+        <div class="filters">
+          <label class="filter-field">Filtrar por cliente
+            <select id="filtro-cliente" class="input">
+              <option value="">Todos los clientes</option>
+            </select>
+          </label>
+          <p class="section-meta"><strong id="conteo-mascotas">0</strong> mascotas</p>
+        </div>
+        <button class="btn btn-primary" data-action="nueva-mascota" type="button">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-plus"></use></svg>
+          Nueva mascota
+        </button>
+      </div>
+      <div class="surface overflow-hidden">
+        <div class="table-wrap" role="region" aria-label="Listado de mascotas" tabindex="0">
+          <table class="table-base">
+            <caption class="sr-only">Mascotas registradas</caption>
+            <thead>
+            <tr><th scope="col">Mascota</th><th scope="col">Especie / raza</th><th scope="col">Edad</th><th scope="col">Peso</th><th scope="col">Dueño</th><th scope="col" class="text-right">Acciones</th></tr>
+            </thead>
+            <tbody id="tabla-mascotas"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-reservas" class="view hidden">
+      <div class="section-toolbar">
+        <div class="filters">
+          <label class="filter-field">Fecha
+            <input id="filtro-fecha" class="input" type="date">
+          </label>
+          <label class="filter-field">Estado
+            <select id="filtro-estado" class="input">
+              <option value="">Todos los estados</option>
+              <option value="PENDIENTE">PENDIENTE</option>
+              <option value="CONFIRMADA">CONFIRMADA</option>
+              <option value="CANCELADA">CANCELADA</option>
+              <option value="ATENDIDA">ATENDIDA</option>
+            </select>
+          </label>
+          <button class="btn btn-ghost btn-sm" data-action="limpiar-filtros" type="button">Limpiar filtros</button>
+        </div>
+        <p class="section-meta"><strong id="conteo-reservas">0</strong> reservas</p>
+      </div>
+      <div class="surface overflow-hidden">
+        <div class="table-wrap" role="region" aria-label="Listado de reservas" tabindex="0">
+          <table class="table-base">
+            <caption class="sr-only">Reservas médicas</caption>
+            <thead>
+            <tr><th scope="col">Mascota</th><th scope="col">Dueño</th><th scope="col">Veterinario</th><th scope="col">Fecha</th><th scope="col">Hora</th><th scope="col">Estado</th><th scope="col" class="text-right">Acciones</th></tr>
+            </thead>
+            <tbody id="tabla-reservas"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-atenciones" class="view hidden">
+      <div class="section-toolbar">
+        <div class="filters">
+          <label class="filter-field">Filtrar por mascota
+            <select id="filtro-atencion-mascota" class="input">
+              <option value="">Todas las mascotas</option>
+            </select>
+          </label>
+          <p class="section-meta"><strong id="conteo-atenciones">0</strong> atenciones</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button class="btn btn-ghost btn-sm" data-action="ver-todas-atenciones" type="button">Ver todas</button>
+          <button class="btn btn-primary" data-action="nueva-atencion" type="button">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-plus"></use></svg>
+            Registrar atención
+          </button>
+        </div>
+      </div>
+      <div class="surface overflow-hidden">
+        <div class="table-wrap" role="region" aria-label="Historial de atenciones" tabindex="0">
+          <table class="table-base">
+            <caption class="sr-only">Atenciones médicas registradas</caption>
+            <thead>
+            <tr><th scope="col">Mascota</th><th scope="col">Reserva</th><th scope="col">Diagnóstico</th><th scope="col">Tratamiento</th><th scope="col">Medicamentos</th><th scope="col">Registrada</th></tr>
+            </thead>
+            <tbody id="tabla-atenciones"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-medicamentos" class="view hidden">
+      <form id="form-medicamentos" class="surface mb-6 p-5">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-end">
+          <label class="flex-1 text-xs font-bold text-muted-foreground">Buscar medicamento
+            <span class="search-field mt-1 block">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-search"></use></svg>
+              <input id="medicamento-busqueda" class="input" type="search" placeholder="Amoxicilina, carprofeno, fipronil..." autocomplete="off">
+            </span>
+          </label>
+          <button id="btn-buscar-medicamento" class="btn btn-primary" type="submit">Buscar</button>
+        </div>
+        <p class="field-hint mt-2">Los datos provienen de la API de integraciones del segundo equipo.</p>
+      </form>
+      <div class="surface overflow-hidden">
+        <div id="resultado-medicamentos" class="med-list"></div>
+      </div>
+    </section>
+
+    <section id="view-clinica" class="view hidden">
+      <div class="clinic-grid">
+        <div class="surface overflow-hidden">
+          <div id="mapa" class="clinic-map"></div>
+        </div>
+        <div class="surface p-6">
+          <div class="clinic-icon">
+            <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-map-pin"></use></svg>
+          </div>
+          <h2 id="clinica-nombre" class="mt-4 text-xl text-foreground">PetCare Chillán</h2>
+          <p id="clinica-direccion" class="mt-1 text-sm text-muted-foreground">Av. O'Higgins 123, Chillán</p>
+          <p id="clinica-coords" class="mt-2 text-xs tabular text-muted-foreground"></p>
+          <a id="clinica-como-llegar" class="btn btn-primary mt-5 hidden" href="#" target="_blank" rel="noopener">Cómo llegar</a>
+          <p class="field-hint mt-3">La ubicación se obtiene desde la API de integraciones.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-notificaciones" class="view hidden">
+      <div class="section-toolbar">
+        <p class="section-meta"><strong id="conteo-notificaciones">0</strong> notificaciones registradas</p>
+        <button class="btn btn-ghost btn-sm" data-action="recargar-notificaciones" type="button">Actualizar</button>
+      </div>
+      <div class="surface p-5">
+        <div id="lista-notificaciones" class="timeline"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<dialog id="dialogo-cliente" class="dialog" aria-labelledby="titulo-dialogo-cliente">
+  <form id="form-cliente" class="dialog-body">
+    <div class="dialog-header">
+      <div class="dialog-icon dialog-icon-pink">
+        <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-user"></use></svg>
+      </div>
+      <div>
+        <h2 id="titulo-dialogo-cliente" class="dialog-title">Nuevo cliente</h2>
+        <p class="dialog-subtitle">Datos de contacto del dueño.</p>
+      </div>
+    </div>
+    <p class="form-error hidden" data-form-error role="alert"></p>
+    <input id="cliente-id" type="hidden">
+    <div class="form-grid">
+      <label class="field field-span-2"><span class="label">Nombre</span><input id="cliente-nombre" class="input" maxlength="120" required autofocus placeholder="María González"></label>
+      <label class="field"><span class="label">Teléfono</span><input id="cliente-telefono" class="input" maxlength="30" placeholder="+56 9 1234 5678"></label>
+      <label class="field"><span class="label">Email</span><input id="cliente-email" class="input" maxlength="160" type="email" required placeholder="maria@correo.cl"><span class="field-hint">Se usa para las notificaciones de la reserva.</span></label>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn btn-ghost" data-close type="button">Cancelar</button>
+      <button class="btn btn-primary" type="submit">Guardar cliente</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dialogo-mascota" class="dialog" aria-labelledby="titulo-dialogo-mascota">
+  <form id="form-mascota" class="dialog-body">
+    <div class="dialog-header">
+      <div class="dialog-icon dialog-icon-mint">
+        <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-paw"></use></svg>
+      </div>
+      <div>
+        <h2 id="titulo-dialogo-mascota" class="dialog-title">Nueva mascota</h2>
+        <p class="dialog-subtitle">Asocia el paciente a su dueño.</p>
+      </div>
+    </div>
+    <p class="form-error hidden" data-form-error role="alert"></p>
+    <input id="mascota-id" type="hidden">
+    <div class="form-grid">
+      <label class="field field-span-2"><span class="label">Dueño</span><select id="mascota-cliente" class="input" required autofocus></select></label>
+      <label class="field"><span class="label">Nombre</span><input id="mascota-nombre" class="input" maxlength="120" required placeholder="Luna"></label>
+      <label class="field"><span class="label">Especie</span><input id="mascota-especie" class="input" maxlength="60" required placeholder="Perro"></label>
+      <label class="field"><span class="label">Raza</span><input id="mascota-raza" class="input" maxlength="80" placeholder="Mestiza"></label>
+      <label class="field"><span class="label">Fecha de nacimiento</span><input id="mascota-fecha" class="input" type="date" required></label>
+      <label class="field"><span class="label">Peso (kg)</span><input id="mascota-peso" class="input" min="0.01" step="0.01" type="number" required placeholder="12.5"><span class="field-hint">Se registra en kilogramos.</span></label>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn btn-ghost" data-close type="button">Cancelar</button>
+      <button class="btn btn-primary" type="submit">Guardar mascota</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dialogo-reserva" class="dialog" aria-labelledby="titulo-dialogo-reserva">
+  <form id="form-reserva" class="dialog-body">
+    <div class="dialog-header">
+      <div class="dialog-icon dialog-icon-cream">
+        <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+      </div>
+      <div>
+        <h2 id="titulo-dialogo-reserva" class="dialog-title">Nueva reserva</h2>
+        <p class="dialog-subtitle">Agenda una hora para una mascota.</p>
+      </div>
+    </div>
+    <p class="form-error hidden" data-form-error role="alert"></p>
+    <input id="reserva-id" type="hidden">
+    <div class="form-grid">
+      <label class="field field-span-2"><span class="label">Mascota</span><select id="reserva-mascota" class="input" required autofocus></select></label>
+      <label class="field field-span-2"><span class="label">Veterinario</span><select id="reserva-veterinario" class="input" required></select></label>
+      <label class="field"><span class="label">Fecha</span><input id="reserva-fecha" class="input" type="date" required></label>
+      <label class="field"><span class="label">Hora</span><input id="reserva-hora" class="input" type="time" required></label>
+    </div>
+    <div class="form-note">
+      <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-info"></use></svg>
+      <p>No se permiten dos reservas para el mismo veterinario, fecha y hora. Una reserva cancelada libera el horario.</p>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn btn-ghost" data-close type="button">Cancelar</button>
+      <button class="btn btn-primary" type="submit">Guardar reserva</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dialogo-atencion" class="dialog" aria-labelledby="titulo-dialogo-atencion">
+  <form id="form-atencion" class="dialog-body">
+    <div class="dialog-header">
+      <div class="dialog-icon dialog-icon-lavender">
+        <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-stethoscope"></use></svg>
+      </div>
+      <div>
+        <h2 id="titulo-dialogo-atencion" class="dialog-title">Registrar atención</h2>
+        <p class="dialog-subtitle">Solo aparecen reservas confirmadas.</p>
+      </div>
+    </div>
+    <p class="form-error hidden" data-form-error role="alert"></p>
+    <div class="form-grid">
+      <label class="field field-span-2"><span class="label">Reserva confirmada</span><select id="atencion-reserva-select" class="input" required autofocus></select></label>
+      <label class="field field-span-2"><span class="label">Diagnóstico</span><textarea id="atencion-diagnostico" class="input" maxlength="500" rows="3" required placeholder="Dermatitis alérgica..."></textarea></label>
+      <label class="field field-span-2"><span class="label">Tratamiento</span><textarea id="atencion-tratamiento" class="input" maxlength="500" rows="3" required placeholder="Baño medicado y control en 15 días..."></textarea></label>
+      <label class="field field-span-2"><span class="label">Medicamentos (opcional)</span><textarea id="atencion-medicamentos" class="input" maxlength="500" rows="2" placeholder="Amoxicilina 10mg/kg cada 12h"></textarea></label>
+    </div>
+    <div class="form-note">
+      <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-info"></use></svg>
+      <p>Al guardar, la reserva pasa a ATENDIDA y la atención queda en el historial de la mascota.</p>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn btn-ghost" data-close type="button">Cancelar</button>
+      <button class="btn btn-primary" type="submit">Registrar atención</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

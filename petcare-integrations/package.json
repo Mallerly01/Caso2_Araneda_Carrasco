@@ -1,7 +1,7 @@
 {
   "name": "petcare-integrations",
   "version": "1.0.0",
-  "description": "APIs externas PetCare para segundo PC",
+  "description": "API de integraciones propia de PetCare para el segundo equipo",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const seed = require('./firestore.sample.json');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -8,23 +9,25 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-const medicamentos = [
-  { id: '1', nombre: 'Amoxicilina', principioActivo: 'Amoxicilina', dosis: '10mg/kg cada 12h' },
-  { id: '2', nombre: 'Carprofeno', principioActivo: 'Carprofeno', dosis: '2mg/kg cada 12h' },
-  { id: '3', nombre: 'Fipronil', principioActivo: 'Fipronil', dosis: '1 pipeta mensual' }
-];
-
-const clinica = { nombre: 'PetCare Chillan', lat: -36.6065, lng: -72.1034, direccion: 'Av. Principal 123' };
-const notificaciones = [];
+const medicamentos = seed.medicamentos;
+const clinica = seed.clinica.sede_central;
+const notificaciones = seed.notificaciones_log.map((notificacion, indice) => ({
+  id: String(indice + 1),
+  ...notificacion
+}));
 
 app.get('/api/medicamentos', (req, res) => {
-  const q = (req.query.nombre || '').toLowerCase();
+  const q = String(req.query.nombre || '').trim().toLowerCase();
   if (!q) return res.json(medicamentos);
-  res.json(medicamentos.filter((m) => m.nombre.toLowerCase().includes(q)));
+  res.json(medicamentos.filter((medicamento) => medicamento.nombre.toLowerCase().includes(q)));
 });
 
 app.get('/api/clinica/ubicacion', (req, res) => {
   res.json(clinica);
+});
+
+app.get('/api/notificaciones', (req, res) => {
+  res.json(notificaciones);
 });
 
 app.post('/api/notificaciones', (req, res) => {
@@ -32,10 +35,19 @@ app.post('/api/notificaciones', (req, res) => {
   if (!destinatario || !tipoEvento || !mensaje) {
     return res.status(400).json({ error: 'Faltan destinatario, tipoEvento o mensaje' });
   }
-  const n = { id: String(notificaciones.length + 1), destinatario, tipoEvento, mensaje, fecha: new Date().toISOString() };
-  notificaciones.push(n);
-  console.log('Notificacion:', n);
-  res.json({ ok: true, id: n.id });
+  if (!['CONFIRMADA', 'CANCELADA'].includes(tipoEvento)) {
+    return res.status(400).json({ error: 'tipoEvento debe ser CONFIRMADA o CANCELADA' });
+  }
+  const notificacion = {
+    id: String(notificaciones.length + 1),
+    destinatario,
+    tipoEvento,
+    mensaje,
+    fecha: new Date().toISOString()
+  };
+  notificaciones.push(notificacion);
+  console.log('Notificacion:', notificacion);
+  res.json({ ok: true, id: notificacion.id });
 });
 
 app.get('/health', (req, res) => res.json({ ok: true }));
